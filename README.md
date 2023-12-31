@@ -1,6 +1,8 @@
 
 # 克隆项目
-
+```
+git clone https://github.com/octavei/dddd.git
+```
 # 创建python虚拟环境并激活
 ```angular2html
 python3 -m venv myenv
