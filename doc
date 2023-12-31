@@ -1,0 +1,13 @@
+流程设计：
+
+1.扫块服务，transfer_pending,全部入库，user_balance from的available 转入hold
+
+2.校验服务，检查transfer_pending库，解开txhash，查看是否合法？（包括hash合法性，from to检查，balance是否足够检查）。同时检查交易receipt，判定交易是否成功。
+ 如果以上全部合法，则move transfer_pending数据到transfer_completed,，则把from的hold扣减，加上to的balance，然后插入一条user_bill数据(关联transfer_completed里面的txhash)，一个事务，统一commit。
+
+
+
+3.系统安全检查服务（对账服务）
+ 1.user_bill每分钟数据对账，beforeBalance+amount= afterBalance
+ 2.user_bill的after_Balance,永远等于user_balance表里面的available+hold
+ 3.user_balance的sum之后，要永远等于改币种总额。
