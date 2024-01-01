@@ -9,7 +9,6 @@ from loguru import logger
 
 
 def main(start_block: int):
-    load_dotenv()
     logger.add("file.log", level="INFO", rotation="{} day".format(os.getenv("ROTATION")), retention="{} weeks".format(os.getenv("RENTENTION")))
     db_interface = DBInterface(host=os.getenv("HOST"),
                                user=os.getenv("USER"),
@@ -32,7 +31,6 @@ def main(start_block: int):
 
 
 if __name__ == "__main__":
-    # load_dotenv()
     # db_interface = DBInterface(host=os.getenv("HOST"),
     #                            user=os.getenv("USER"),
     #                            pwd=os.getenv("PASSWORD"),
@@ -69,4 +67,5 @@ if __name__ == "__main__":
     # db_interface.update_or_insert_crawler_block_height("DOTA", 59140)
     # # db_interface.update_or_insert_checker_crawler_block_height("DOTA",399,999);
     # db_interface.commit_batch_update_insert(batch_name)
-    main(70399)
+    load_dotenv()
+    main(int(os.getenv("TRANSFER_START_BLOCK")))
