@@ -17,7 +17,7 @@ redis_host = 'localhost'  # Redis 服务器地址
 redis_port = 6379  # Redis 服务器端口
 redis_db = 0  # Redis 数据库索引
 redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
-
+# redis_client.flushdb()
 
 class Crawler:
     def __init__(self,  mysql_db: DBInterface, logger: Logger, start_block: int = 0):
@@ -225,7 +225,7 @@ class Crawler:
                 if self.start_block >= latest_block_num:
                     time.sleep(2)
                     continue
-                if self.start_block + 10 < latest_block_num:
+                if self.start_block + 3 < latest_block_num:
                     self.insert_txs_into_redis(start=self.start_block, end=latest_block_num)
                 for n in range(self.start_block, latest_block_num):
                     vail_txs = self.get_transfer_txs_by_block_num(n)
