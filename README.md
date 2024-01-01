@@ -34,6 +34,9 @@ export URLS="wss://eosla.com"
 export ROTATION=1
 # 最多保留多少周的数据
 export RENTENTION=4
+
+# 开始接受转账的区块
+export TRANSFER_START_BLOCK=0
 ```
 # 运行
 ```angular2html
