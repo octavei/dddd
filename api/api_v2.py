@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, redirect, Response
 import json,os
-from base1 import DBInterface, DBLog
+from db.base1 import DBInterface, DBLog
 
 # client = pymongo.MongoClient("mongodb://127.0.0.1/", 27017)
 #
@@ -112,6 +112,6 @@ def get_transaction_status():
     return jsonify({"status": res_row[1]})
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1950)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=1950)
 

@@ -1021,3 +1021,25 @@
 2024-01-01 20:03:00.187 | WARNING  | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:100 - 非法memo {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}, err: socket is already closed.
 2024-01-01 20:03:00.189 | WARNING  | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:100 - 非法memo {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}, err: socket is already closed.
 2024-01-01 20:04:09.298 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_by_block_num:112 - 在redis中直接获取交易: b'[]'
+2024-01-01 21:16:51.156 | INFO     | transfer.transfer_txs_crawler:run:212 - crawler启动
+2024-01-01 21:16:52.084 | INFO     | transfer.transfer_txs_crawler:insert_txs_into_redis:129 - 区块高度差距大， 直接先爬到redis中. 72391 - 86957
+2024-01-01 21:17:01.201 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73431 的交易
+2024-01-01 21:17:01.657 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#72490 的交易
+2024-01-01 21:17:02.052 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73424 的交易
+2024-01-01 21:17:02.052 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73424, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:02.113 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73427 的交易
+2024-01-01 21:17:02.488 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73432 的交易
+2024-01-01 21:17:02.488 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73432, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:02.568 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73428 的交易
+2024-01-01 21:17:02.568 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73428, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:02.858 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#72495 的交易
+2024-01-01 21:17:02.905 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73433 的交易
+2024-01-01 21:17:03.258 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#72499 的交易
+2024-01-01 21:17:03.307 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73436 的交易
+2024-01-01 21:17:03.307 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73436, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:03.426 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73434 的交易
+2024-01-01 21:17:03.426 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73434, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:03.742 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73430 的交易
+2024-01-01 21:17:03.743 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73430, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
+2024-01-01 21:17:03.855 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:46 - 正在爬取区块#73422 的交易
+2024-01-01 21:17:03.856 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:69 - #73422, memo: {'p': 'dot-20', 'op': 'transfer', 'tick': 'dota', 'amt': '10000'}
