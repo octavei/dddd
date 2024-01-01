@@ -1,4 +1,3 @@
-# 爬取区块数据 进入pending库 只
 
 import time
 from transfer.common import connect_substrate, sorted_txs, total_amount
