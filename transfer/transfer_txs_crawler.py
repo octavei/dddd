@@ -133,22 +133,26 @@ class Crawler:
                 v.append(i)
             else:
                 self.logger.debug(f"区块#{i}已经有数据在redis中")
-        with ThreadPoolExecutor(max_workers=20) as executor:
-            # 提交任务到线程池
-            future_to_task = {
-                executor.submit(self.get_transfer_txs_by_block_num, i): f"Task {i}"  for i in
-                              v}
-            # 等待所有任务完成
-            for future in as_completed(future_to_task):
-                task_name = future_to_task[future]
-                try:
-                    vail_txs = future.result()  # 获取任务的结果
-                    # for tx in vail_txs:
-                    redis_client.set(str(task_name).strip(), "hahahah")
-                except Exception as e:
-                    self.logger.debug(f"Task {task_name} encountered an error: {e}")
-                else:
-                    self.logger.debug(f"Task {task_name} completed successfully")
+        try:
+            with ThreadPoolExecutor(max_workers=20) as executor:
+                # 提交任务到线程池
+                future_to_task = {
+                    executor.submit(self.get_transfer_txs_by_block_num, i): f"{i}"  for i in
+                                  v}
+                # 等待所有任务完成
+                for future in as_completed(future_to_task):
+                    task_name = future_to_task[future]
+                    try:
+                        vail_txs = future.result()  # 获取任务的结果
+                        self.logger.debug(f"#{str(task_name).strip()} 入库")
+                        redis_client.set(str(task_name).strip(), json.dumps(vail_txs))
+                        self.logger.debug(f"Task {task_name} completed successfully")
+                    except Exception as e:
+                        self.logger.debug(f"Task {task_name} encountered an error: {e}")
+        except Exception as e:
+            self.insert_txs_into_redis(start, end)
+
+
 
 
     def insert_txs_into_mysql(self, txs: list, block_num: int) -> bool:

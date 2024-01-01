@@ -14,9 +14,9 @@ from transfer.transfer_txs_crawler import *
 
 
 if __name__ == "__main__":
-    redis_client.set(str(1), "hahaha")
-    if redis_client.get(str(1)) is None:
-        print("kkkk")
+    # redis_client.set(str(1), "hahaha")
+    # if redis_client.get(str(1)) is None:
+    #     print("kkkk")
     print(redis_client.get(str(1)))
     # start_block = 0
     # load_dotenv()
