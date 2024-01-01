@@ -53,7 +53,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "preferences.sourceCode.CSS",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -65,7 +65,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1704015191272</updated>
-      <workItem from="1704015195254" duration="19736000" />
+      <workItem from="1704015195254" duration="20272000" />
     </task>
     <servers />
   </component>
