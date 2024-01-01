@@ -152,9 +152,6 @@ class Crawler:
         except Exception as e:
             self.insert_txs_into_redis(start, end)
 
-
-
-
     def insert_txs_into_mysql(self, txs: list, block_num: int) -> bool:
         if len(txs) == 0:
             batch_name = "crawler_block_height"
@@ -225,7 +222,7 @@ class Crawler:
                 if self.start_block >= latest_block_num:
                     time.sleep(2)
                     continue
-                if self.start_block + 3 < latest_block_num:
+                if self.start_block + 2 <= latest_block_num:
                     self.insert_txs_into_redis(start=self.start_block, end=latest_block_num)
                 for n in range(self.start_block, latest_block_num):
                     vail_txs = self.get_transfer_txs_by_block_num(n)
