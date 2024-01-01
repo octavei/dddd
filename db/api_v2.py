@@ -89,9 +89,9 @@ def get_balance_list():
 
 ##前台查询转账有没有成功，tx_hash,后台查一下最新的这一条tx_hash, 返回status，前台拿status 0 ，待确认，1交易成功，失败：9, 查不到数据：10000
 ##查询transation_dota那张表就可以
-# 使用例子：http://192.168.2.104:1950/v1/get_trsanction_status?tx_hash=0x2115d16eef21dd6af7657c1b7fe49e198564befab35150793e11b1cc8dccb5e9
-@app.route("/v1/get_trsanction_status", methods=["GET"])
-def get_trsanction_status():
+# 使用例子：http://192.168.2.104:1950/v1/get_transaction_status?tx_hash=0x2115d16eef21dd6af7657c1b7fe49e198564befab35150793e11b1cc8dccb5e9
+@app.route("/v1/get_transaction_status", methods=["GET"])
+def get_transaction_status():
     tx_hash = request.args['tx_hash'].strip()
     query = db_interface.drv.query_db(table_name="transaction_dota",
                                       query_columns=["id", "status"],
@@ -102,7 +102,7 @@ def get_trsanction_status():
     if rows is None or len(rows) <= 0:
         rows = [(0, 10000)]
     if DEBUG_LOG:
-        print(f"/v1/get_trsanction_status get rows:{rows}")
+        print(f"/v1/get_transaction_status get rows:{rows}")
 
     res_row = rows[0]
     for row in rows:
