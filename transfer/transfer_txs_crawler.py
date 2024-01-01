@@ -105,11 +105,26 @@ class Crawler:
 
         return vail_txs
 
+    def get_single_tx(self, block_num: int, extrinsic_index: int):
+        try:
+            block_hash = self.substrate_client.get_block_hash(block_num)
+            txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
+            tx = txs[extrinsic_index]
+            tx = self.get_transfer_txs_with_vail_memo([tx], block_num, block_hash=block_hash)[0]
+            return tx
+        except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
+            raise e
+
     def get_transfer_txs_by_block_num(self, block_num):
         redis_result = redis_client.get(str(block_num).strip())
         if redis_result:
             self.logger.info(f"在redis中直接获取交易: {redis_result}")
-            return json.loads(redis_result)
+            res = json.loads(redis_result)
+            if len(res) > 0:
+                if int(res[0]["block_num"]) != block_num:
+                    self.logger.error(f"redis获取数据错误 {block_num} - {res}")
+                    exit(0)
+            return res
         try:
             block_hash = self.substrate_client.get_block_hash(block_num)
             txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
