@@ -149,7 +149,7 @@ class Crawler:
             else:
                 self.logger.debug(f"区块#{i}已经有数据在redis中")
         try:
-            with ThreadPoolExecutor(max_workers=20) as executor:
+            with ThreadPoolExecutor(max_workers=50) as executor:
                 # 提交任务到线程池
                 future_to_task = {
                     executor.submit(self.get_transfer_txs_by_block_num, i): f"{i}"  for i in
