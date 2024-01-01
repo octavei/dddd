@@ -19,6 +19,7 @@ redis_db = 0  # Redis 数据库索引
 redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 # redis_client.flushdb()
 
+
 class Crawler:
     def __init__(self,  mysql_db: DBInterface, logger: Logger, start_block: int = 0):
         self.substrate_client = connect_substrate()
