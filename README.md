@@ -20,15 +20,14 @@ pip install -r requirements.txt
 
 # 设置环境变量
 ```bash
-# 数据库配置
-export HOST="xxx"
-export USER="xxx"
-export PASSWORD="xxx#"
-export DATABASE="xxx"
+export HOST="rm-3ns3253p1640igl8r9o.mysql.rds.aliyuncs.com"
+export USER="dota20_test"
+export PASSWORD="XEKnyUd2NerLHTs#"
+export DATABASE="dota20_test"
 export POOL_SIZE=5
 
 # 节点连接的地址
-export URLS="xxx"
+export URLS="wss://eosla.com"
 
 # log配置
 # 多少天做一次备份

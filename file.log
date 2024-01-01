@@ -1,0 +1,14 @@
+2024-01-01 19:33:12.426 | INFO     | transfer.transfer_txs_crawler:run:213 - crawler启动
+2024-01-01 19:33:13.452 | INFO     | transfer.transfer_txs_crawler:insert_txs_into_redis:130 - 区块高度差距大， 直接先爬到redis中. 72391 - 85921
+2024-01-01 19:33:19.887 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72496 的交易
+2024-01-01 19:33:19.888 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72498 的交易
+2024-01-01 19:33:20.147 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72489 的交易
+2024-01-01 19:33:20.225 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72486 的交易
+2024-01-01 19:33:20.263 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72406 的交易
+2024-01-01 19:33:20.264 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72484 的交易
+2024-01-01 19:33:20.265 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72466 的交易
+2024-01-01 19:33:20.266 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72483 的交易
+2024-01-01 19:33:20.318 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72491 的交易
+2024-01-01 19:33:20.319 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72488 的交易
+2024-01-01 19:33:20.683 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72497 的交易
+2024-01-01 19:33:20.814 | INFO     | transfer.transfer_txs_crawler:get_transfer_txs_with_vail_memo:47 - 正在爬取区块#72465 的交易
