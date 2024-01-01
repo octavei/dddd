@@ -109,9 +109,14 @@ class Crawler:
         try:
             block_hash = self.substrate_client.get_block_hash(block_num)
             txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
+            if len(txs) < extrinsic_index + 1:
+                return None
             tx = txs[extrinsic_index]
-            tx = self.get_transfer_txs_with_vail_memo([tx], block_num, block_hash=block_hash)[0]
-            return tx
+            tx = self.get_transfer_txs_with_vail_memo([tx], block_num, block_hash=block_hash)
+            if len(tx) == 0:
+                return None
+            tx[0]["extrinsic_index"] = extrinsic_index
+            return tx[0]
         except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
             raise e
 
