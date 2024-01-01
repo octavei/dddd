@@ -1,4 +1,9 @@
 
+# 安装redis
+```angular2html
+sudo apt install redis-server
+sudo systemctl start redis-server
+```
 # 克隆项目
 ```
 git clone https://github.com/octavei/dddd.git

@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6bd57776-bf36-44e3-bdd8-0a2fec0149aa" name="变更" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dota.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dota.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transfer/transfer_txs_crawler.py" beforeDir="false" afterPath="$PROJECT_DIR$/transfer/transfer_txs_crawler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +65,7 @@
       <option name="presentableId" value="Default" />
       <updated>1704015191272</updated>
       <workItem from="1704015195254" duration="21595000" />
-      <workItem from="1704105945292" duration="630000" />
+      <workItem from="1704105945292" duration="1248000" />
     </task>
     <servers />
   </component>
