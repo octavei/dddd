@@ -9,6 +9,14 @@ from websocket import WebSocketConnectionClosedException, WebSocketTimeoutExcept
 from scalecodec.types import GenericExtrinsic
 from db.base1 import DBInterface
 from logging import Logger
+import redis
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+redis_host = 'localhost'  # Redis 服务器地址
+redis_port = 6379  # Redis 服务器端口
+redis_db = 0  # Redis 数据库索引
+redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
 
 class Crawler:
@@ -34,7 +42,7 @@ class Crawler:
         return users_balance_dict
 
     # 检查合法transfer交易，并返回
-    def get_transfer_txs_with_vail_memo(self, txs: list, block_hash: str, block_num: int) -> list:
+    def get_transfer_txs_with_vail_memo(self, txs: list, block_num: int, block_hash: str) -> list:
         self.logger.info(f"正在爬取区块#{block_num} 的交易")
         vail_txs = []
         for index, tx in enumerate(txs):
@@ -78,7 +86,7 @@ class Crawler:
                                     raise e
 
                                 if receipt.is_success:
-                                    tx_js = {"block_hash": block_hash, "block_num": block_num, "tx_hash": tx_hash,
+                                    tx_js = {"block_num": block_num, "tx_hash": tx_hash,
                                              "extrinsic_index": index, "from": from_, "to": to, "tick": tick,
                                              "amt": amt, "status": 0}
                                     vail_txs.append(tx_js)
@@ -98,10 +106,14 @@ class Crawler:
         return vail_txs
 
     def get_transfer_txs_by_block_num(self, block_num):
+        redis_result = redis_client.get(str(block_num).strip())
+        if redis_result:
+            self.logger.info(f"在redis中直接获取交易: {redis_result}")
+            return json.loads(redis_result)
         try:
             block_hash = self.substrate_client.get_block_hash(block_num)
             txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
-            vail_txs = self.get_transfer_txs_with_vail_memo(txs, block_hash, block_num=block_num)
+            vail_txs = self.get_transfer_txs_with_vail_memo(txs, block_num=block_num, block_hash=block_hash)
             self.logger.debug(f"高度#{block_num} 获得合法交易 {vail_txs}")
             return vail_txs
         except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
@@ -109,8 +121,35 @@ class Crawler:
 
     def get_tx_receipt(self, extrinsic_hash, block_hash, block_number, extrinsic_idx, finalized):
         return ExtrinsicReceipt(self.substrate_client, extrinsic_hash=extrinsic_hash,
-                                                       block_hash=block_hash, block_number=block_number,
+                                block_hash=block_hash,
+                                                       block_number=block_number,
                                                        extrinsic_idx=extrinsic_idx, finalized=finalized)
+
+    def insert_txs_into_redis(self, start: int, end: int):
+        self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
+        v = []
+        for i in range(start, end):
+            if redis_client.get(str(i).strip()) is None:
+                v.append(i)
+            else:
+                self.logger.debug(f"区块#{i}已经有数据在redis中")
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            # 提交任务到线程池
+            future_to_task = {
+                executor.submit(self.get_transfer_txs_by_block_num, i): f"Task {i}"  for i in
+                              v}
+            # 等待所有任务完成
+            for future in as_completed(future_to_task):
+                task_name = future_to_task[future]
+                try:
+                    vail_txs = future.result()  # 获取任务的结果
+                    # for tx in vail_txs:
+                    redis_client.set(str(task_name).strip(), "hahahah")
+                except Exception as e:
+                    self.logger.debug(f"Task {task_name} encountered an error: {e}")
+                else:
+                    self.logger.debug(f"Task {task_name} completed successfully")
+
 
     def insert_txs_into_mysql(self, txs: list, block_num: int) -> bool:
         if len(txs) == 0:
@@ -182,10 +221,10 @@ class Crawler:
                 if self.start_block >= latest_block_num:
                     time.sleep(2)
                     continue
-                start = self.start_block
-                for n in range(start, latest_block_num):
+                if self.start_block + 10 < latest_block_num:
+                    self.insert_txs_into_redis(start=self.start_block, end=latest_block_num)
+                for n in range(self.start_block, latest_block_num):
                     vail_txs = self.get_transfer_txs_by_block_num(n)
-                    # if len(vail_txs) > 0:
                     if self.insert_txs_into_mysql(vail_txs, n) is False:
                         self.logger.error("程序结束!")
                         exit(0)
