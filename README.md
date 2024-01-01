@@ -26,6 +26,8 @@ export PASSWORD="XEKnyUd2NerLHTs#"
 export DATABASE="dota20_test"
 export POOL_SIZE=5
 
+# 连接的网络名称 波卡主网是Polkadot 测试网是Development
+export CHAIN="Development"
 # 节点连接的地址
 export URLS="wss://eosla.com"
 

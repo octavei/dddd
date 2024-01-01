@@ -18,7 +18,9 @@ def connect_substrate():
         )
         print("连接上节点: {}".format(url))
         print(f"chain: {substrate.chain}, format: {substrate.ss58_format}, token symbol: {substrate.token_symbol}")
-
+        if substrate.chain != os.getenv("CHAIN"):
+            print("请选择正确的网络节点地址。网络名称与环境变量CHAIN不同")
+            exit(0)
         return substrate
     except ConnectionRefusedError:
         print("⚠️ No local Substrate node running, try running 'start_local_substrate_node.sh' first")

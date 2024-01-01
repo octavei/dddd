@@ -12,6 +12,21 @@ import os
 from transfer.transfer_txs_crawler import *
 
 
+def connect_substrate():
+    # url = "wss://polkadot-rpc.dwellir.com"
+    url = "wss://eosla.com"
+    try:
+        substrate = SubstrateInterface(
+            url=url,
+        )
+        print("连接上节点: {}".format(url))
+        print(f"chain: {substrate.chain}, format: {substrate.ss58_format}, token symbol: {substrate.token_symbol}")
+
+        return substrate
+    except ConnectionRefusedError:
+        print("⚠️ No local Substrate node running, try running 'start_local_substrate_node.sh' first")
+        time.sleep(6)
+        return connect_substrate()
 
 if __name__ == "__main__":
     # redis_client.set(str(1), "hahaha")
@@ -56,3 +71,4 @@ if __name__ == "__main__":
     #             print(f"Task {task_name} completed successfully")
     #
     # print("All tasks are done")
+    connect_substrate()
