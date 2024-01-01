@@ -39,3 +39,8 @@ export RENTENTION=4
 ```angular2html
 python main.py
 ```
+
+# 启动api
+```angular2html
+python run_api.py
+```
