@@ -193,7 +193,7 @@ class DBInterfaceDriver:
             sql_insert = sql_insert[:-2]
         self.__push_batch(batch_name, sql_insert)
 
-    def query_db(self, table_name, query_columns, condition_columns, condition_values):
+    def query_db(self, table_name, query_columns, condition_columns, condition_values,order=None, limit=None, offset=None):
         conditions = ""
         if condition_columns is not None and len(condition_columns) > 0:
             conditions = "WHERE "
@@ -210,7 +210,16 @@ class DBInterfaceDriver:
             columns = columns[:-2]
         query_sql = f"SELECT {columns} from {table_name} {conditions}"
 
+        if order is not None:
+            query_sql += f" ORDER BY available DESC"
+        if limit is not None:
+            query_sql += f" LIMIT {limit}"
+        if offset is not None:
+            query_sql += f" OFFSET {offset}"
+
         return query_sql
+
+
 
     def delete_db(self, batch_name, table_name, condition_columns, condition_values):
         conditions = ""

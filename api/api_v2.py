@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, redirect, Response
 import json,os
-from db.base1 import DBInterface, DBLog
+from base1 import DBInterface, DBLog
 
 # client = pymongo.MongoClient("mongodb://127.0.0.1/", 27017)
 #
@@ -62,16 +62,21 @@ def get_tick_list():
 
 
 ## 查询单一币种的全体持仓地址及余额
-# 使用例子：http://test.dota.fyi/v1/get_balance_list?tick=DOTA
+# 使用例子：http://test.dota.fyi/v1/get_balance_list?tick=DOTA&order=desc&limit=10&offset=200
 @app.route("/v1/get_balance_list", methods=["GET"])
 def get_balance_list():
-    tick = request.args['tick'].strip()
-    if tick is None:
-        tick = "DOTA"
+    tick = request.args.get('tick', 'DOTA').strip()
+    order = request.args.get('order', 'DESC').strip()
+    limit = int(request.args.get('limit', '100'))
+    offset = int(request.args.get('offset', '0'))
+
     query = db_interface.drv.query_db(table_name="user_currency_balance",
                                       query_columns=["user_address","available", "hold"],
                                       condition_columns=["currency_tick"],
-                                      condition_values=[tick])
+                                      condition_values=[tick],
+                                      order=order,
+                                      limit=limit,
+                                      offset=offset)
     rows = db_interface.drv.fetch_batch_query([query])
     balance_list = []
     for row in rows:
