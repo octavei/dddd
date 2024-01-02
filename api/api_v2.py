@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, redirect, Response
 import json,os
-from base1 import DBInterface, DBLog
+from db.base1 import DBInterface, DBLog
 
 # client = pymongo.MongoClient("mongodb://127.0.0.1/", 27017)
 #
