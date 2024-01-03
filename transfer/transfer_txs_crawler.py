@@ -12,21 +12,15 @@ import redis
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-redis_host = 'localhost'  # Redis 服务器地址
-redis_port = 6379  # Redis 服务器端口
-redis_db = 0  # Redis 数据库索引
-redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
-# redis_client.flushdb()
-
-
 class Crawler:
-    def __init__(self,  mysql_db: DBInterface, logger: Logger, start_block: int = 0):
+    def __init__(self,  mysql_db: DBInterface, redis_db, logger: Logger, start_block: int = 0):
         self.substrate_client = connect_substrate()
         self.tick = "DOTA"
         self.start_block = start_block
         self.mysql_db = mysql_db
         self.ask_for_stopping = False
         self.is_stop = False
+        self.redis_db = redis_db
         self.logger = logger
 
     def get_users_balances_from_mysql(self, tick: str, users: list) -> dict:
@@ -114,7 +108,7 @@ class Crawler:
         return vail_txs
 
     def get_transfer_txs_by_block_num(self, block_num, extrinsic_index=None):
-        redis_result = redis_client.get(str(block_num).strip())
+        redis_result = self.redis_db.get(str(block_num).strip())
         if redis_result:
             self.logger.info(f"在redis中直接获取交易: {redis_result}")
             res = json.loads(redis_result)
@@ -147,7 +141,7 @@ class Crawler:
         self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
         v = []
         for i in range(start, end):
-            if redis_client.get(str(i).strip()) is None:
+            if self.redis_db.get(str(i).strip()) is None:
                 v.append(i)
             else:
                 self.logger.debug(f"区块#{i}已经有数据在redis中")
@@ -163,7 +157,7 @@ class Crawler:
                     try:
                         vail_txs = future.result()  # 获取任务的结果
                         self.logger.debug(f"#{str(task_name).strip()} 入库")
-                        redis_client.set(str(task_name).strip(), json.dumps(vail_txs))
+                        self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
                         self.logger.debug(f"Task {task_name} completed successfully")
                     except Exception as e:
                         self.logger.debug(f"Task {task_name} encountered an error: {e}")

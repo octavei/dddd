@@ -1,7 +1,7 @@
 import json
 import time
 
-from transfer.transfer_txs_crawler import Crawler, redis_client
+from transfer.transfer_txs_crawler import Crawler
 from transfer.common import connect_substrate, total_amount
 from db.base1 import DBInterface
 from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException

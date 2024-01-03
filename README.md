@@ -26,6 +26,11 @@ export PASSWORD="XEKnyUd2NerLHTs#"
 export DATABASE="dota20_test"
 export POOL_SIZE=5
 
+# redis
+export REDIS_HOST="localhost"
+export REDIS_PORT=6379
+export REDIS_DB=0
+
 # 连接的网络名称 波卡主网是Polkadot 测试网是Development
 export CHAIN="Development"
 # 节点连接的地址

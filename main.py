@@ -6,9 +6,15 @@ from db.base1 import DBInterface, DBLog
 from dotenv import load_dotenv
 import os
 from loguru import logger
-
+import redis
 
 def main(start_block: int):
+    redis_host = os.getenv("REDIS_HOST")  # Redis 服务器地址
+    redis_port = int(os.getenv("REDIS_PORT"))  # Redis 服务器端口
+    redis_db = int(os.getenv("REDIS_DB"))  # Redis 数据库索引
+    redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
+    # redis_client.flushdb()
+
     logger.add("file.log", level="INFO", rotation="{} day".format(os.getenv("ROTATION")), retention="{} weeks".format(os.getenv("RENTENTION")))
     db_interface = DBInterface(host=os.getenv("HOST"),
                                user=os.getenv("USER"),
@@ -25,7 +31,7 @@ def main(start_block: int):
         crawler_start_block_num = start_block
         print(f"checker和crawler都还没有设置高度, 将使用默认值 {start_block}。 err: {e}")
     print(f"checker_start_block_num: {checker_start_block_num}, crawler_start_block_num: {crawler_start_block_num}")
-    crawler = Crawler(db_interface, logger, crawler_start_block_num + 1)
+    crawler = Crawler(db_interface, redis_client, logger, crawler_start_block_num + 1)
     checker = TransferChecker(checker_start_block_num + 1, crawler, logger, db_interface)
     crawler.run(checker.check_txs)
 
