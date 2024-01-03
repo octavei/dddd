@@ -122,7 +122,7 @@ def check_balance(now, crawler: Crawler):
                     asyncio.run(send("Vail user address. address should be {} but {}".format(bill_item_json["to_address"], bill_item_json["user_address"])))
                     kill()
                     return False
-                if bill_item_json["amount"] != vail_tx["amt"]:
+                if int(bill_item_json["amount"]) != int(vail_tx["amt"]):
                     asyncio.run(send("Diff amount"))
                     kill()
                     return False
@@ -132,7 +132,7 @@ def check_balance(now, crawler: Crawler):
                         "Vail user address. address should be {} but {}".format(bill_item_json["from_address"],                                                    bill_item_json["user_address"])))
                     kill()
                     return False
-                if bill_item_json["amount"] != 0 - vail_tx["amt"]:
+                if int(bill_item_json["amount"]) != int(0 - vail_tx["amt"]):
                     asyncio.run(send("Diff amount"))
                     kill()
                     return False
@@ -141,7 +141,7 @@ def check_balance(now, crawler: Crawler):
                 kill()
                 return False
 
-            if bill_item_json["before_balance"] + bill_item_json["amount"] != bill_item_json["after_balance"]:
+            if int(bill_item_json["before_balance"] + bill_item_json["amount"]) != int(bill_item_json["after_balance"]):
                 asyncio.run(send("before_balance + amount != after_balance"))
                 kill()
                 return False
