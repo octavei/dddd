@@ -146,6 +146,7 @@ class TransferChecker():
                     exit(0)
                 if self.update_users_balance(mysql_txs, n) is False:
                     exit(0)
+                self.crawler.redis_db.set(str(n), json.dumps(crawler_txs))
                 self.start_block += 1
 
 
