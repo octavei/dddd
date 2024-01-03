@@ -91,14 +91,14 @@ class TransferChecker():
             return False
         return True
 
-    def is_txs_equal(self, mysql_txs: list, crawler_txs: list) -> bool:
+    def is_txs_equal(self, mysql_txs: list, crawler_txs: list, now_block: int) -> bool:
         if len(mysql_txs) != len(crawler_txs):
             self.logger.error("交易数量不同。")
             return False
         for mysql_item, crawler_item in zip(mysql_txs, crawler_txs):
             self.logger.debug(f"正在处理交易: {mysql_item} {crawler_item}")
-            if mysql_item["block_num"] != crawler_item["block_num"]:
-                self.logger.error("区块高度不同")
+            if mysql_item["block_num"] != now_block or crawler_item["block_num"] != now_block:
+                self.logger.error(f"区块高度错误{now_block} - {mysql_item} - {crawler_item}")
                 return False
             if mysql_item["tx_hash"] != crawler_item["tx_hash"]:
                 self.logger.error("交易hash不同")
@@ -139,7 +139,7 @@ class TransferChecker():
                 if len(mysql_txs) != len(crawler_txs):
                     self.logger.error(f"区块高度#{n} 交易数量不一致")
                     exit(0)
-                is_equal = self.is_txs_equal(mysql_txs, crawler_txs)
+                is_equal = self.is_txs_equal(mysql_txs, crawler_txs, n)
                 if is_equal is False:
                     self.logger.error(f"区块高度#{n} 交易数据不一致，程序停止！")
                     exit(0)
