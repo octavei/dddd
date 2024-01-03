@@ -4,11 +4,14 @@ import telegram
 import time
 import redis
 import json, os
+from transfer.common import connect_substrate
 from loguru import logger
 from db.base1 import DBInterface, DBLog
 import subprocess
 from transfer.transfer_txs_crawler import Crawler
 from dotenv import load_dotenv
+from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException
+from substrateinterface.exceptions import SubstrateRequestException
 
 DEBUG_LOG = True
 TOKEN = "6645928388:AAEdxZKLY16-WOlzSGlzNO1IyWqxiZXswjk"  # 电报Bot Token
@@ -105,43 +108,60 @@ def check_balance(now, crawler: Crawler):
         bill_item_json = {"user_address": bill_item[0], "currency_tick": bill_item[1], "after_balance": bill_item[2], "id": bill_item[3],
                           "from_address": bill_item[4], "to_address": bill_item[5], "type": bill_item[6], "tx_hash": bill_item[7],"block_height": bill_item[8],
                           "extrinsic_index": bill_item[9], "amount": bill_item[10], "before_balance": bill_item[11]}
-        vail_txs = crawler.get_transfer_txs_by_block_num(block_num=bill_item_json["block_height"], extrinsic_index=bill_item_json["extrinsic_index"])
+        try:
+            vail_txs = crawler.get_transfer_txs_by_block_num(block_num=bill_item_json["block_height"], extrinsic_index=bill_item_json["extrinsic_index"])
+        except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
+            crawler.substrate_client = connect_substrate()
+            vail_txs = crawler.get_transfer_txs_by_block_num(block_num=bill_item_json["block_height"],
+                                                             extrinsic_index=bill_item_json["extrinsic_index"])
+
         if len(vail_txs) == 1:
             vail_tx = vail_txs[0]
             if int(bill_item_json["type"]) == 3:
                 if bill_item_json["user_address"] != bill_item_json["to_address"]:
                     asyncio.run(send("Vail user address. address should be {} but {}".format(bill_item_json["to_address"], bill_item_json["user_address"])))
                     kill()
+                    return False
                 if bill_item_json["amount"] != vail_tx["amt"]:
                     asyncio.run(send("Diff amount"))
                     kill()
+                    return False
             elif int(bill_item_json["type"]) == 2:
                 if bill_item_json["user_address"] != bill_item_json["from_address"]:
                     asyncio.run(send(
                         "Vail user address. address should be {} but {}".format(bill_item_json["from_address"],                                                    bill_item_json["user_address"])))
                     kill()
+                    return False
                 if bill_item_json["amount"] != 0 - vail_tx["amt"]:
                     asyncio.run(send("Diff amount"))
                     kill()
+                    return False
             else:
                 asyncio.run(send("Not support type"))
                 kill()
+                return False
 
             if bill_item_json["before_balance"] + bill_item_json["amount"] != bill_item_json["after_balance"]:
                 asyncio.run(send("before_balance + amount != after_balance"))
                 kill()
+                return False
             if bill_item_json["from_address"] != vail_tx["from"] or bill_item_json["to_address"] != vail_tx["to"]:
                 asyncio.run(send("Diff address"))
                 kill()
+                return False
             if bill_item_json["currency_tick"] != vail_tx["tick"]:
                 asyncio.run(send("Diff tick"))
                 kill()
+                return False
             if vail_tx["tx_hash"] != bill_item_json["tx_hash"]:
                 asyncio.run(send("Diff tx hash"))
                 kill()
+                return False
         else:
             asyncio.run(send("len(vail_txs) != 1"))
             kill()
+            return False
+
 
     billist = {}
     for item in bill:
