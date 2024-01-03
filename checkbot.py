@@ -209,7 +209,6 @@ def check_balance(now, crawler: Crawler):
 def while_check(crawler: Crawler):
     while check_balance(time.time(), crawler):
         time.sleep(60)  # 每分钟一次检查
-        check_balance(time.time(), crawler)
 
 
 if __name__ == "__main__":
@@ -222,12 +221,6 @@ if __name__ == "__main__":
 
     logger.add("file.log", level="INFO", rotation="{} day".format(os.getenv("ROTATION")),
                retention="{} weeks".format(os.getenv("RENTENTION")))
-    db_interface = DBInterface(host=os.getenv("HOST"),
-                               user=os.getenv("USER"),
-                               pwd=os.getenv("PASSWORD"),
-                               dbname=os.getenv("DATABASE"),
-                               pool_size=int(os.getenv("POOL_SIZE")),
-                               log_lv=DBLog.LV_VERBOSE)
     crawler = Crawler(db_interface, redis_client, logger)
     while_check(crawler)
 
