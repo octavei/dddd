@@ -35,7 +35,7 @@ app = Flask(__name__)
 ##tick,tick;total_supply,total_supply;
 ##holders的话，需要拿tick，去user_balance表里，查总数，tick假如有1000条记录，那么holders=1000
 ###{"code":0,"ticks":[{"deploy_number":18681973,"deployer":"14drmsz2ixltvqt69uvk9mmefun4oqeptytnm44wheecaeou","holders":26501,"market_supply":209927114779,"op":"deploy","p":"dot-20","start_block":18681993,"supply":5000000,"tick":"DOTA","total_supply":210000000000}],"total":1}
-##使用例子：http://192.168.2.104:1950/v1/get_tick_list
+##使用例子：http://test.dota.fyi/v1/get_tick_list
 @app.route("/v1/get_tick_list", methods=["GET"])
 def get_tick_list():
     query = db_interface.drv.query_db(table_name="token_list_status",
@@ -67,7 +67,7 @@ def get_tick_list():
 
 ## 查询user_currency_balance , tick不传的就默认dota,返回available就可以，扩展一下吧，返回值里面有available和hold，
 ##{"balance_list":{"DOTA":53801467},"hold":xxx,"code":0}
-# 使用例子：http://192.168.2.104:1950/v1/get_balance_list?tick=DOTA
+# 使用例子：http://test.dota.fyi/v1/get_balance_list?tick=DOTA
 @app.route("/v1/get_balance_list", methods=["GET"])
 def get_balance_list():
     tick = request.args['tick'].strip()
@@ -87,9 +87,35 @@ def get_balance_list():
     return jsonify({'balance_list': balance_list})
 
 
+## 查询 user_currency_balance
+# 使用例子：http://test.dota.fyi/v1/get_account_balance?tick=DOTA&account=5DqkV6QazaFn2BQwBcsaZkg7PvdbC4LGVfuJj9FpX9nnX8Ym
+@app.route("/v1/get_account_balance", methods=["GET"])
+def get_account_balance():
+    tick = request.args['tick'].strip()
+    account = request.args['account'].strip()
+    if tick is None:
+        tick = "DOTA"
+    if len(account)<47 or len(account)>48:
+        return jsonify({'error': 'Wrong Address Format'}), 400
+    query = db_interface.drv.query_db(table_name="user_currency_balance",
+                                      query_columns=["available", "hold"],
+                                      condition_columns=["user_address","currency_tick"],
+                                      condition_values=[account,tick])
+    rows = db_interface.drv.fetch_batch_query([query])
+    balance = []
+    for row in rows:
+        balance.append({"user_address":account,"tick": tick, "available": row[0], "hold": row[1]})
+    if DEBUG_LOG:
+        print(f"balance:{balance}")
+    return jsonify({'balance': balance})
+
+
+
+
+
 ##前台查询转账有没有成功，tx_hash,后台查一下最新的这一条tx_hash, 返回status，前台拿status 0 ，待确认，1交易成功，失败：9, 查不到数据：10000
 ##查询transation_dota那张表就可以
-# 使用例子：http://192.168.2.104:1950/v1/get_transaction_status?tx_hash=0x2115d16eef21dd6af7657c1b7fe49e198564befab35150793e11b1cc8dccb5e9
+# 使用例子：http://test.dota.fyi/v1/get_transaction_status?tx_hash=0x2115d16eef21dd6af7657c1b7fe49e198564befab35150793e11b1cc8dccb5e9
 @app.route("/v1/get_transaction_status", methods=["GET"])
 def get_transaction_status():
     tx_hash = request.args['tx_hash'].strip()

@@ -2,6 +2,7 @@
 import time
 from transfer.common import connect_substrate, sorted_txs, total_amount
 import json
+import asyncio
 from substrateinterface import SubstrateInterface, Keypair, ExtrinsicReceipt
 from substrateinterface.exceptions import SubstrateRequestException
 from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException
@@ -107,6 +108,12 @@ class Crawler:
 
         return vail_txs
 
+    async def async_get_transfer_txs_by_block_num(self, block_num):
+        loop = asyncio.get_event_loop()
+        # 将同步操作委托给线程池中的线程
+        result = await loop.run_in_executor(None, self.get_transfer_txs_by_block_num, block_num)
+        return result
+
     def get_transfer_txs_by_block_num(self, block_num, extrinsic_index=None):
         redis_result = self.redis_db.get(str(block_num).strip())
         if redis_result:
@@ -136,6 +143,38 @@ class Crawler:
                                 block_hash=block_hash,
                                                        block_number=block_number,
                                                        extrinsic_idx=extrinsic_idx, finalized=finalized)
+
+    async def async_insert_txs_into_redis(self, start: int, end: int):
+        self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
+        v = []
+        for i in range(start, end):
+            if self.redis_db.get(str(i).strip()) is None:
+                v.append(i)
+            else:
+                self.logger.debug(f"区块#{i}已经有数据在redis中")
+        if len(v) == 0:
+            return
+        tasks = []
+
+        try:
+            for i in v:
+                task = asyncio.Task(self.async_get_transfer_txs_by_block_num(i), name=str(i))
+                tasks.append(task)
+
+            completed_tasks, _ = await asyncio.wait(tasks)
+            # 处理已完成的任务
+            for task in completed_tasks:
+                try:
+                    vail_txs = task.result()  # 获取任务的结果
+                    task_name = f"{task.get_name()}"  # 修改为任务名的获取方式
+                    self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
+                    self.logger.debug(f"#{str(task_name).strip()} 入库")
+                except Exception as e:
+                    print(f"Task encountered an error: {e}")
+        except Exception as e:
+            await self.async_insert_txs_into_redis(
+                start, end
+            )
 
     def insert_txs_into_redis(self, start: int, end: int):
         self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
@@ -235,7 +274,9 @@ class Crawler:
                     time.sleep(2)
                     continue
                 if self.start_block + 3 <= latest_block_num:
-                    self.insert_txs_into_redis(start=self.start_block, end=latest_block_num)
+                    # loop = asyncio.get_event_loop()
+                    # loop.run_until_complete(self.async_insert_txs_into_redis(self.start_block, latest_block_num))
+                    self.insert_txs_into_redis(self.start_block, latest_block_num)
                 for n in range(self.start_block, latest_block_num):
                     vail_txs = self.get_transfer_txs_by_block_num(n)
                     if self.insert_txs_into_mysql(vail_txs, n) is False:
