@@ -16,7 +16,8 @@ def main(start_block: int):
     redis_host = os.getenv("REDIS_HOST")  # Redis 服务器地址
     redis_port = int(os.getenv("REDIS_PORT"))  # Redis 服务器端口
     redis_db = int(os.getenv("REDIS_DB"))  # Redis 数据库索引
-    redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db)
+    redis_pool = redis.ConnectionPool(host=redis_host, port=redis_port, db=redis_db, max_connections=20)
+    redis_client = redis.StrictRedis(connection_pool=redis_pool)
     # redis_client.flushdb()
 
     logger.add("file.log", level="INFO", rotation="{} day".format(os.getenv("ROTATION")), retention="{} weeks".format(os.getenv("RENTENTION")))
