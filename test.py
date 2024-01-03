@@ -32,7 +32,9 @@ if __name__ == "__main__":
     # redis_client.set(str(1), "hahaha")
     # if redis_client.get(str(1)) is None:
     #     print("kkkk")
-    print(redis_client.get(str(1)))
+    a = "a"
+    print("a: ", list(a))
+    # print(redis_client.get(str(1)))
     # start_block = 0
     # load_dotenv()
     # logger.add("file.log", level="INFO", rotation="{} day".format(os.getenv("ROTATION")),

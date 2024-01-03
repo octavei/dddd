@@ -42,10 +42,18 @@ class Crawler:
         return users_balance_dict
 
     # 检查合法transfer交易，并返回
-    def get_transfer_txs_with_vail_memo(self, txs: list, block_num: int, block_hash: str) -> list:
+    def get_transfer_txs_with_vail_memo(self, generic_extrinsics: list, block_num: int, block_hash: str, extrinsic_index = None) -> list:
         self.logger.info(f"正在爬取区块#{block_num} 的交易")
+        if extrinsic_index is not None:
+            try:
+                generic_extrinsics = [generic_extrinsics[extrinsic_index]]
+            except Exception as e:
+                self.logger.warning(f"根据extrinsic_index去获取单一交易失败: {e}")
+                return []
         vail_txs = []
-        for index, tx in enumerate(txs):
+        for index, tx in enumerate(generic_extrinsics):
+            if extrinsic_index is not None:
+                index = extrinsic_index
             # 判断是否是正确的交易格式
             if isinstance(tx, GenericExtrinsic) is False:
                 self.logger.error(f"区块#{block_num} 数据错误，程序停止。")
@@ -105,22 +113,7 @@ class Crawler:
 
         return vail_txs
 
-    def get_single_tx(self, block_num: int, extrinsic_index: int):
-        try:
-            block_hash = self.substrate_client.get_block_hash(block_num)
-            txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
-            if len(txs) < extrinsic_index + 1:
-                return None
-            tx = txs[extrinsic_index]
-            tx = self.get_transfer_txs_with_vail_memo([tx], block_num, block_hash=block_hash)
-            if len(tx) == 0:
-                return None
-            tx[0]["extrinsic_index"] = extrinsic_index
-            return tx[0]
-        except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
-            raise e
-
-    def get_transfer_txs_by_block_num(self, block_num):
+    def get_transfer_txs_by_block_num(self, block_num, extrinsic_index=None):
         redis_result = redis_client.get(str(block_num).strip())
         if redis_result:
             self.logger.info(f"在redis中直接获取交易: {redis_result}")
@@ -129,11 +122,16 @@ class Crawler:
                 if int(res[0]["block_num"]) != block_num:
                     self.logger.error(f"redis获取数据错误 {block_num} - {res}")
                     exit(0)
+            if extrinsic_index:
+                res = list(filter(lambda x: int(x["extrinsic_index"]) == extrinsic_index, res))
+                if len(res) > 1:
+                    self.logger.error("有重复交易索引， 请检查redis原数据")
+                    exit(0)
             return res
         try:
             block_hash = self.substrate_client.get_block_hash(block_num)
             txs = self.substrate_client.get_extrinsics(block_hash=block_hash)
-            vail_txs = self.get_transfer_txs_with_vail_memo(txs, block_num=block_num, block_hash=block_hash)
+            vail_txs = self.get_transfer_txs_with_vail_memo(txs, block_num=block_num, block_hash=block_hash, extrinsic_index=extrinsic_index)
             self.logger.debug(f"高度#{block_num} 获得合法交易 {vail_txs}")
             return vail_txs
         except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException) as e:
