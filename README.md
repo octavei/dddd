@@ -54,3 +54,8 @@ python main.py
 ```angular2html
 python run_api.py
 ```
+
+# 启动checkbot
+```angular2html
+python checkbot.py
+```
