@@ -1,6 +1,7 @@
+import json
 import time
 
-from transfer.transfer_txs_crawler import Crawler
+from transfer.transfer_txs_crawler import Crawler, redis_client
 from transfer.common import connect_substrate, total_amount
 from db.base1 import DBInterface
 from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException
@@ -146,6 +147,7 @@ class TransferChecker():
                 if self.update_users_balance(mysql_txs, n) is False:
                     exit(0)
                 self.start_block += 1
+
 
         else:
             time.sleep(3)
