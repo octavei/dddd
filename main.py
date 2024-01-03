@@ -37,13 +37,13 @@ def main(start_block: int):
     print(f"checker_start_block_num: {checker_start_block_num}, crawler_start_block_num: {crawler_start_block_num}")
     crawler = Crawler(db_interface, redis_client, logger, crawler_start_block_num + 1)
     checker = TransferChecker(checker_start_block_num + 1, crawler, logger, db_interface)
-    t1 = threading.Thread(target=crawler.run, args=(checker.check_txs, ))
-    t2 = threading.Thread(target=checkbot.while_check, args=(crawler, ))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    # crawler.run(checker.check_txs)
+    # t1 = threading.Thread(target=crawler.run, args=(checker.check_txs, ))
+    # t2 = threading.Thread(target=checkbot.while_check, args=(crawler, ))
+    # t1.start()
+    # t2.start()
+    # t1.join()
+    # t2.join()
+    crawler.run(checker.check_txs)
 
 
 if __name__ == "__main__":
