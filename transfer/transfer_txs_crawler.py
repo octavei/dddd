@@ -208,9 +208,8 @@ class Crawler:
                     task_name = future_to_task[future]
                     try:
                         vail_txs = future.result()  # 获取任务的结果
-                        self.logger.debug(f"区块#{str(task_name).strip()} 入库redis")
                         self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
-                        self.logger.debug(f"Task {task_name} completed successfully")
+                        self.logger.debug(f"区块#{str(task_name).strip()} 入库redis")
                     except Exception as e:
                         self.logger.debug(f"区块 #{task_name} 请求未超时， 但是出现了错误: {e}")
                 # 理未完成的任务（超时的任务）
