@@ -8,6 +8,7 @@ import os
 from loguru import logger
 import redis
 
+
 def main(start_block: int):
     redis_host = os.getenv("REDIS_HOST")  # Redis 服务器地址
     redis_port = int(os.getenv("REDIS_PORT"))  # Redis 服务器端口
