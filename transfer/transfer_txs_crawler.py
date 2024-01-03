@@ -301,6 +301,7 @@ class Crawler:
                     # loop.run_until_complete(self.async_insert_txs_into_redis(self.start_block, end))
                     self.insert_txs_into_redis(self.start_block, end)
                 for n in range(self.start_block, end):
+                    self.logger.debug(f"正在处理区块#{n} 的交易数据到mysql中")
                     vail_txs = self.get_transfer_txs_by_block_num(n)
                     if self.insert_txs_into_mysql(vail_txs, n) is False:
                         self.logger.error("程序结束!")
