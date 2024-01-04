@@ -144,42 +144,42 @@ class Crawler:
                                                        block_number=block_number,
                                                        extrinsic_idx=extrinsic_idx, finalized=finalized)
 
-    async def async_insert_txs_into_redis(self, start: int, end: int):
-        self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
-        v = []
-        for i in range(start, end):
-            if self.redis_db.get(str(i).strip()) is None:
-                v.append(i)
-            else:
-                self.logger.debug(f"区块#{i}已经有数据在redis中")
-        if len(v) == 0:
-            return
-        tasks = []
-
-        try:
-            for i in v:
-                task = asyncio.Task(self.async_get_transfer_txs_by_block_num(i), name=str(i))
-                tasks.append(task)
-            try:
-                completed_tasks, _ = await asyncio.wait_for(tasks, timeout=60)
-            except asyncio.TimeoutError as e:
-                self.logger.warning(f"线程等待超时: {e}")
-                await self.async_insert_txs_into_redis(
-                    start, end
-                )
-            # 处理已完成的任务
-            for task in completed_tasks:
-                try:
-                    vail_txs = task.result()  # 获取任务的结果
-                    task_name = f"{task.get_name()}"  # 修改为任务名的获取方式
-                    self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
-                    self.logger.debug(f"#{str(task_name).strip()} 入库")
-                except Exception as e:
-                    print(f"Task encountered an error: {e}")
-        except Exception as e:
-            await self.async_insert_txs_into_redis(
-                start, end
-            )
+    # async def async_insert_txs_into_redis(self, start: int, end: int):
+    #     self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
+    #     v = []
+    #     for i in range(start, end):
+    #         if self.redis_db.get(str(i).strip()) is None:
+    #             v.append(i)
+    #         else:
+    #             self.logger.debug(f"区块#{i}已经有数据在redis中")
+    #     if len(v) == 0:
+    #         return
+    #     tasks = []
+    #
+    #     try:
+    #         for i in v:
+    #             task = asyncio.Task(self.async_get_transfer_txs_by_block_num(i), name=str(i))
+    #             tasks.append(task)
+    #         try:
+    #             completed_tasks, _ = await asyncio.wait_for(tasks, timeout=60)
+    #         except asyncio.TimeoutError as e:
+    #             self.logger.warning(f"线程等待超时: {e}")
+    #             await self.async_insert_txs_into_redis(
+    #                 start, end
+    #             )
+    #         # 处理已完成的任务
+    #         for task in completed_tasks:
+    #             try:
+    #                 vail_txs = task.result()  # 获取任务的结果
+    #                 task_name = f"{task.get_name()}"  # 修改为任务名的获取方式
+    #                 self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
+    #                 self.logger.debug(f"#{str(task_name).strip()} 入库")
+    #             except Exception as e:
+    #                 print(f"Task encountered an error: {e}")
+    #     except Exception as e:
+    #         await self.async_insert_txs_into_redis(
+    #             start, end
+    #         )
 
     def insert_txs_into_redis(self, start: int, end: int):
         self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
@@ -189,14 +189,16 @@ class Crawler:
                 v.append(i)
             else:
                 self.logger.debug(f"区块#{i}已经有数据在redis中")
+        if len(v) == 0:
+            return
         try:
-            with ThreadPoolExecutor(max_workers=30) as executor:
-                # 提交任务到线程池
+            with ThreadPoolExecutor(max_workers=50) as executor:
+            # 提交任务到线程池
                 future_to_task = {
                     executor.submit(self.get_transfer_txs_by_block_num, i): f"{i}"  for i in
                                   v}
                 # 设置超时时间为60秒
-                timeout = 60
+                timeout = 20
 
                 # 等待所有任务完成，设置超时时间
                 completed, not_completed = wait(
@@ -216,9 +218,15 @@ class Crawler:
                 for future in not_completed:
                     task_name = future_to_task[future]
                     self.logger.warning(f" 区块#{task_name} 数据请求超时， 未能成功入库redis")
+                executor.shutdown(wait=False, cancel_futures=True)
+                self.logger.info("insert_txs_into_redis 函数执行完毕")
+                    # executor.shutdown(wait=False)
 
         except Exception as e:
-            self.insert_txs_into_redis(start, end)
+            self.logger.error(f"insert_txs_into_redis 函数执行发生错误: {e}")
+            raise e
+            # self.insert_txs_into_redis(start, end)
+        self.logger.debug("end")
 
     def insert_txs_into_mysql(self, txs: list, block_num: int) -> bool:
         if len(txs) == 0:
@@ -278,6 +286,7 @@ class Crawler:
     # 爬取数据的主函数 只要没有接受到结束指令，就会一直爬取
     def run(self, checker_check_func):
         self.logger.info("crawler启动")
+        # with ThreadPoolExecutor(max_workers=50) as executor:
         while True:
             try:
                 latest_block_hash = self.substrate_client.get_chain_finalised_head()
@@ -300,6 +309,8 @@ class Crawler:
                     # loop = asyncio.get_event_loop()
                     # loop.run_until_complete(self.async_insert_txs_into_redis(self.start_block, end))
                     self.insert_txs_into_redis(self.start_block, end)
+                    self.logger.debug(f"入库redis结束 {self.start_block} - {end}")
+                self.logger.debug(f"正在把区块{self.start_block} - {end}")
                 for n in range(self.start_block, end):
                     self.logger.debug(f"正在处理区块#{n} 的交易数据到mysql中")
                     vail_txs = self.get_transfer_txs_by_block_num(n)

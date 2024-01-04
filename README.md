@@ -32,9 +32,9 @@ export REDIS_PORT=6379
 export REDIS_DB=0
 
 # 连接的网络名称 波卡主网是Polkadot 测试网是Development
-export CHAIN="Development"
+export CHAIN="Polkadot"
 # 节点连接的地址
-export URLS="wss://eosla.com"
+export URLS="wss://polkadot-rpc.dwellir.com"
 
 # log配置
 # 多少天做一次备份
@@ -43,7 +43,7 @@ export ROTATION=1
 export RENTENTION=4
 
 # 开始接受转账的区块
-export TRANSFER_START_BLOCK=0
+export TRANSFER_START_BLOCK=18884000
 ```
 # 运行
 ```angular2html
