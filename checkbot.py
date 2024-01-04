@@ -118,8 +118,8 @@ def check_balance(now, crawler: Crawler):
         if len(vail_txs) == 1:
             vail_tx = vail_txs[0]
             if int(bill_item_json["type"]) == 3:
-                if bill_item_json["user_address"] != bill_item_json["to_address"]:
-                    asyncio.run(send("Vail user address. address should be {} but {}".format(bill_item_json["to_address"], bill_item_json["user_address"])))
+                if bill_item_json["user_address"] != bill_item_json["from_address"]:
+                    asyncio.run(send("Vail user address. address should be {} but {}".format(bill_item_json["from_address"], bill_item_json["user_address"])))
                     kill()
                     return False
                 if int(bill_item_json["amount"]) != int(vail_tx["amt"]):
@@ -127,9 +127,9 @@ def check_balance(now, crawler: Crawler):
                     kill()
                     return False
             elif int(bill_item_json["type"]) == 2:
-                if bill_item_json["user_address"] != bill_item_json["from_address"]:
+                if bill_item_json["user_address"] != bill_item_json["to_address"]:
                     asyncio.run(send(
-                        "Vail user address. address should be {} but {}".format(bill_item_json["from_address"],                                                    bill_item_json["user_address"])))
+                        "Vail user address. address should be {} but {}".format(bill_item_json["to_address"],bill_item_json["user_address"])))
                     kill()
                     return False
                 if int(bill_item_json["amount"]) != int(0 - vail_tx["amt"]):

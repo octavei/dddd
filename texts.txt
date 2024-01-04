@@ -1,0 +1,10 @@
+INSERT INTO `user_bill` (`after_balance`, `amount`, `before_balance`, `block_height`, `create_time`, `currency_tick`, `extrinsic_index`, `fee`, `from_address`, `id`, `modify_time`, `to_address`, `tx_hash`, `type`, `user_address`)
+
+
+VALUES ('165666.000000','-1000.00000000','166666.000000','18883672',null,'DOTA','4','0.00000000','1463QD1JU6JtLDitdgAytra7bQZ5Jb4Ugy68gwyg3mNyA8md','2888','2024-01-04 08:27:44','14zfavSKSGZoQpg9KThvXeMqwHAeDr5sYx3cRbunQdUrP2nQ','0x74a5c8b7e50c477895c35fe3bc4855901e58f383a2c5226d9ea17104b59d3ec4','3','1463QD1JU6JtLDitdgAytra7bQZ5Jb4Ugy68gwyg3mNyA8md');
+VALUES ('1000.000000','1000.00000000','0.000000','18883672',null,'DOTA','4','0.00000000','1463QD1JU6JtLDitdgAytra7bQZ5Jb4Ugy68gwyg3mNyA8md','2889','2024-01-04 08:27:44','14zfavSKSGZoQpg9KThvXeMqwHAeDr5sYx3cRbunQdUrP2nQ','0x74a5c8b7e50c477895c35fe3bc4855901e58f383a2c5226d9ea17104b59d3ec4','2','14zfavSKSGZoQpg9KThvXeMqwHAeDr5sYx3cRbunQdUrP2nQ');
+
+
+
+VALUES ('16003936.000000','-10.00000000','16003946.000000','18890522',null,'DOTA','3','0.00000000','129D99R8eb4yGvuNqc7iqUsBqrtZAuXTjU9stW2TqoKgGEM2','2890','2024-01-04 12:32:48','1sGjvfPzBC9x4VANcyFqpFG91nCDdccDmjRGdqq2PtSvgjG','0xa7f50ca51def93d0dd8e205ce615290b6e8cb2a9aa667b167a4f37c7b0a9ecff','3','129D99R8eb4yGvuNqc7iqUsBqrtZAuXTjU9stW2TqoKgGEM2');
+VALUES ('10.000000','10.00000000','0.000000','18890522',null,'DOTA','3','0.00000000','129D99R8eb4yGvuNqc7iqUsBqrtZAuXTjU9stW2TqoKgGEM2','2891','2024-01-04 12:32:48','1sGjvfPzBC9x4VANcyFqpFG91nCDdccDmjRGdqq2PtSvgjG','0xa7f50ca51def93d0dd8e205ce615290b6e8cb2a9aa667b167a4f37c7b0a9ecff','2','1sGjvfPzBC9x4VANcyFqpFG91nCDdccDmjRGdqq2PtSvgjG');
