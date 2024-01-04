@@ -181,7 +181,7 @@ class Crawler:
     #             start, end
     #         )
 
-    def insert_txs_into_redis(self, start: int, end: int):
+    def insert_txs_into_redis(self, start: int, end: int, executor: ThreadPoolExecutor):
         self.logger.info(f"区块高度差距大， 直接先爬到redis中. {start} - {end}")
         v = []
         for i in range(start, end):
@@ -192,35 +192,35 @@ class Crawler:
         if len(v) == 0:
             return
         try:
-            with ThreadPoolExecutor(max_workers=50) as executor:
+            # with ThreadPoolExecutor(max_workers=50) as executor:
             # 提交任务到线程池
-                future_to_task = {
-                    executor.submit(self.get_transfer_txs_by_block_num, i): f"{i}"  for i in
-                                  v}
-                # 设置超时时间为60秒
-                timeout = 20
+            future_to_task = {
+                executor.submit(self.get_transfer_txs_by_block_num, i): f"{i}"  for i in
+                              v}
+            # 设置超时时间为60秒
+            timeout = 20
 
-                # 等待所有任务完成，设置超时时间
-                completed, not_completed = wait(
-                    future_to_task, timeout=timeout, return_when=ALL_COMPLETED
-                )
+            # 等待所有任务完成，设置超时时间
+            completed, not_completed = wait(
+                future_to_task, timeout=timeout, return_when=ALL_COMPLETED
+            )
 
-                # 等待所有任务完成
-                for future in completed:
-                    task_name = future_to_task[future]
-                    try:
-                        vail_txs = future.result()  # 获取任务的结果
-                        self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
-                        self.logger.debug(f"区块#{str(task_name).strip()} 入库redis")
-                    except Exception as e:
-                        self.logger.debug(f"区块 #{task_name} 请求未超时， 但是出现了错误: {e}")
-                # 理未完成的任务（超时的任务）
-                for future in not_completed:
-                    task_name = future_to_task[future]
-                    self.logger.warning(f" 区块#{task_name} 数据请求超时， 未能成功入库redis")
-                executor.shutdown(wait=False, cancel_futures=True)
-                self.logger.info("insert_txs_into_redis 函数执行完毕")
-                    # executor.shutdown(wait=False)
+            # 等待所有任务完成
+            for future in completed:
+                task_name = future_to_task[future]
+                try:
+                    vail_txs = future.result()  # 获取任务的结果
+                    self.redis_db.set(str(task_name).strip(), json.dumps(vail_txs))
+                    self.logger.debug(f"区块#{str(task_name).strip()} 入库redis")
+                except Exception as e:
+                    self.logger.debug(f"区块 #{task_name} 请求未超时， 但是出现了错误: {e}")
+            # 理未完成的任务（超时的任务）
+            for future in not_completed:
+                task_name = future_to_task[future]
+                self.logger.warning(f" 区块#{task_name} 数据请求超时， 未能成功入库redis")
+            # executor.shutdown(wait=False)
+            self.logger.info("insert_txs_into_redis 函数执行完毕")
+                # executor.shutdown(wait=False)
 
         except Exception as e:
             self.logger.error(f"insert_txs_into_redis 函数执行发生错误: {e}")
@@ -286,48 +286,50 @@ class Crawler:
     # 爬取数据的主函数 只要没有接受到结束指令，就会一直爬取
     def run(self, checker_check_func):
         self.logger.info("crawler启动")
-        # with ThreadPoolExecutor(max_workers=50) as executor:
-        while True:
-            try:
-                latest_block_hash = self.substrate_client.get_chain_finalised_head()
-                latest_block_num = self.substrate_client.get_block_number(latest_block_hash)
-                self.logger.debug(f"最新区块高度 #{latest_block_num}")
-                if self.ask_for_stopping is True:
-                    self.is_stop = True
-                if self.is_stop:
-                    self.logger.info("接受到结束指令， 现在结束!")
-                    break
-                if self.start_block >= latest_block_num:
-                    time.sleep(2)
-                    continue
-                if self.start_block + 10 < latest_block_num:
-                    end = self.start_block + 10
-                else:
-                    end = latest_block_num
-                if self.start_block + 3 <= end:
-                    self.logger.debug(f"正在爬取高度 {self.start_block} - {end} 的数据到redis")
-                    # loop = asyncio.get_event_loop()
-                    # loop.run_until_complete(self.async_insert_txs_into_redis(self.start_block, end))
-                    self.insert_txs_into_redis(self.start_block, end)
-                    self.logger.debug(f"入库redis结束 {self.start_block} - {end}")
-                self.logger.debug(f"正在把区块{self.start_block} - {end}")
-                for n in range(self.start_block, end):
-                    self.logger.debug(f"正在处理区块#{n} 的交易数据到mysql中")
-                    vail_txs = self.get_transfer_txs_by_block_num(n)
-                    if self.insert_txs_into_mysql(vail_txs, n) is False:
-                        self.logger.error("程序结束!")
-                        exit(0)
-                    checker_check_func(n)
-                    self.start_block = n + 1
+        with ThreadPoolExecutor(max_workers=50) as executor:
 
-            except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException):
-                self.logger.warning("rpc连接失败，正在重连。。。")
+            while True:
                 try:
-                    self.substrate_client = connect_substrate()
-                except Exception as e:
-                    self.logger.warning(f"多次rpc重连后还是失败， 请检查您的rpc地址是否正确。err：{e}")
-                time.sleep(2)
-                self.run()
+                    latest_block_hash = self.substrate_client.get_chain_finalised_head()
+                    latest_block_num = self.substrate_client.get_block_number(latest_block_hash)
+                    self.logger.debug(f"最新区块高度 #{latest_block_num}")
+                    if self.ask_for_stopping is True:
+                        self.is_stop = True
+                    if self.is_stop:
+                        self.logger.info("接受到结束指令， 现在结束!")
+                        break
+                    if self.start_block >= latest_block_num:
+                        time.sleep(2)
+                        continue
+                    if self.start_block + 10 < latest_block_num:
+                        end = self.start_block + 10
+                    else:
+                        end = latest_block_num
+                    # if self.start_block + 3 <= end:
+                    #     self.logger.debug(f"正在爬取高度 {self.start_block} - {end} 的数据到redis")
+                    #     # loop = asyncio.get_event_loop()
+                    #     # loop.run_until_complete(self.async_insert_txs_into_redis(self.start_block, end))
+                    #     self.insert_txs_into_redis(self.start_block, end, executor)
+                    #     self.logger.debug(f"入库redis结束 {self.start_block} - {end}")
+                    self.logger.debug(f"正在把区块{self.start_block} - {end}")
+                    for n in range(self.start_block, end):
+                        self.logger.debug(f"正在处理区块#{n} 的交易数据到mysql中")
+                        vail_txs = self.get_transfer_txs_by_block_num(n)
+                        if self.insert_txs_into_mysql(vail_txs, n) is False:
+                            self.logger.error("程序结束!")
+                            exit(0)
+                        checker_check_func(n)
+                        self.start_block = n + 1
+
+                except (SubstrateRequestException, WebSocketConnectionClosedException, WebSocketTimeoutException):
+                    self.logger.warning("rpc连接失败，正在重连。。。")
+                    try:
+                        self.substrate_client = connect_substrate()
+                    except Exception as e:
+                        self.logger.warning(f"多次rpc重连后还是失败， 请检查您的rpc地址是否正确。err：{e}")
+                    time.sleep(2)
+                    self.run()
+
 
 
 if __name__ == "__main__":
