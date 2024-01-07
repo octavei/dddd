@@ -14,7 +14,7 @@ from websocket import WebSocketConnectionClosedException, WebSocketTimeoutExcept
 from substrateinterface.exceptions import SubstrateRequestException
 
 DEBUG_LOG = True
-TOKEN = "6645928388:AAEdxZKLY16-WOlzSGlzNO1IyWqxiZXswjk"  # 电报Bot Token
+TOKEN = "6645928388:AAEdxZKLY16-WOlzSGlzNO1IyWqxiZXswjK"  # 电报Bot Token
 CHATID = -1002052818237  # 电报聊天ID
 
 db_interface = DBInterface(
